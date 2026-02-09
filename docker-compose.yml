@@ -35,7 +35,7 @@ services:
   # Frontend (React + Vite)
   frontend:
     build:
-      context: ./src
+      context: ./client
       dockerfile: Dockerfile
     container_name: siniestros-frontend
     restart: always
