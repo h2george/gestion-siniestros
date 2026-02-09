@@ -1,0 +1,48 @@
+services:
+  # Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: siniestros-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-siniestros_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-siniestros_pass}
+      POSTGRES_DB: ${DB_NAME:-siniestros_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  # Backend (Node.js)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: siniestros-backend
+    restart: always
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgres://${DB_USER:-siniestros_user}:${DB_PASSWORD:-siniestros_pass}@db:5432/${DB_NAME:-siniestros_db}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+    ports:
+      - "3005:3001"
+    depends_on:
+      - db
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: siniestros-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
