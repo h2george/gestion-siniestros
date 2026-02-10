@@ -29,6 +29,8 @@ services:
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
     ports:
       - "3005:3001"
+    volumes:
+      - ./backend/.env:/app/.env
     depends_on:
       - db
 
